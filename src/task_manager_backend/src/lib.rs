@@ -90,3 +90,16 @@ fn update_task(id: u64, title: Option<String>, description: Option<String>) -> b
 fn delete_task(id: u64) -> bool {
     TASKS.with(|tasks| tasks.borrow_mut().remove(&id).is_some())
 }
+
+#[ic_cdk::query]
+// search task by status
+fn search_task_by_status(done: bool) -> Vec<Task> {
+    TASKS.with(|tasks| {
+        tasks
+            .borrow()
+            .values()
+            .filter(|task| task.done == done)
+            .cloned()
+            .collect()
+    })
+}

@@ -12,4 +12,5 @@ service : {
   "update_task_status": (nat64, text, text, bool) -> ();
   "update_task": (nat64, opt text, opt text) -> (bool);
   "delete_task": (nat64) -> (bool);
+  "search_task_by_status": (bool) -> (vec customTask) query;
 };
