@@ -3,6 +3,21 @@ use serde::{Serialize, Deserialize};
 use std::{cell::RefCell, collections::HashMap};
 use std::cell::Cell;
 
+// Define an enum for different types of errors
+#[derive(Debug)]
+pub enum TaskManagerError {
+   EmptyTitleOrDescription,
+   TaskNotFound,
+}
+
+impl fmt::Display for TaskManagerError {
+   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+       match *self {
+           TaskManagerError::EmptyTitleOrDescription => write!(f, "Title or Description is empty."),
+           TaskManagerError::TaskNotFound => write!(f, "Task not found."),
+       }
+   }
+}
 
 // Task struct
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
