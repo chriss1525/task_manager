@@ -94,3 +94,152 @@ fn search_task_by_status(done: bool) -> Vec<Task> {
             .collect()
     })
 }
+#[ic_cdk::update]
+// mark task as important
+fn mark_task_as_important(id: u64) -> bool {
+    TASKS.with(|tasks| {
+        if let Some(task) = tasks.borrow_mut().get_mut(&id) {
+            task.is_important = true;
+            true
+        } else {
+            false
+        }
+    })
+}
+
+#[ic_cdk::query]
+// get important tasks
+fn get_important_tasks() -> Vec<Task> {
+    TASKS.with(|tasks| {
+        tasks
+            .borrow()
+            .values()
+            .filter(|task| task.is_important)
+            .cloned()
+            .collect()
+    })
+}
+
+#[ic_cdk::query]
+// get completed tasks
+fn get_completed_tasks() -> Vec<Task> {
+    TASKS.with(|tasks| {
+        tasks
+            .borrow()
+            .values()
+            .filter(|task| task.done)
+            .cloned()
+            .collect()
+    })
+}
+
+#[ic_cdk::query]
+// get incomplete tasks
+fn get_incomplete_tasks() -> Vec<Task> {
+    TASKS.with(|tasks| {
+        tasks
+            .borrow()
+            .values()
+            .filter(|task| !task.done)
+            .cloned()
+            .collect()
+    })
+}
+
+#[ic_cdk::query]
+// get total number of tasks
+fn get_total_number_of_tasks() -> u64 {
+    TASKS.with(|tasks| tasks.borrow().len() as u64)
+}
+#[ic_cdk::query]
+// Get tasks with a specific description
+fn get_tasks_by_description(description: String) -> Vec<Task> {
+    TASKS.with(|tasks| {
+        tasks
+            .borrow()
+            .values()
+            .filter(|task| task.description == description)
+            .cloned()
+            .collect()
+    })
+}
+
+#[ic_cdk::update]
+// Set task importance status
+fn set_task_importance_status(id: u64, is_important: bool) -> bool {
+    TASKS.with(|tasks| {
+        if let Some(task) = tasks.borrow_mut().get_mut(&id) {
+            task.is_important = is_important;
+            true
+        } else {
+            false
+        }
+    })
+}
+
+#[ic_cdk::query]
+// Get tasks based on importance status
+fn get_tasks_by_importance_status(is_important: bool) -> Vec<Task> {
+    TASKS.with(|tasks| {
+        tasks
+            .borrow()
+            .values()
+            .filter(|task| task.is_important == is_important)
+            .cloned()
+            .collect()
+    })
+}
+
+#[ic_cdk::query]
+// Get the total number of tasks
+fn get_total_tasks() -> usize {
+    TASKS.with(|tasks| tasks.borrow().len())
+}
+
+#[ic_cdk::update]
+// Clear all completed tasks
+fn clear_completed_tasks() {
+    TASKS.with(|tasks| {
+        tasks.borrow_mut().retain(|_, task| !task.done);
+    })
+}
+
+
+#[ic_cdk::update]
+// Mark task as done
+fn mark_task_as_done(id: u64) -> bool {
+    TASKS.with(|tasks| {
+        if let Some(task) = tasks.borrow_mut().get_mut(&id) {
+            task.done = true;
+            true
+        } else {
+            false
+        }
+    })
+}
+
+#[ic_cdk::update]
+// Reset task status to not done
+fn reset_task_status(id: u64) -> bool {
+    TASKS.with(|tasks| {
+        if let Some(task) = tasks.borrow_mut().get_mut(&id) {
+            task.done = false;
+            true
+        } else {
+            false
+        }
+    })
+}
+
+#[ic_cdk::query]
+// Get tasks with a specific title
+fn get_tasks_by_title(title: String) -> Vec<Task> {
+    TASKS.with(|tasks| {
+        tasks
+            .borrow()
+            .values()
+            .filter(|task| task.title == title)
+            .cloned()
+            .collect()
+    })
+}
