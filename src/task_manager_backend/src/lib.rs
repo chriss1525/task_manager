@@ -2,7 +2,23 @@ use candid::CandidType;
 use serde::{Serialize, Deserialize};
 use std::{cell::RefCell, collections::HashMap};
 use std::cell::Cell;
+use std::result::Result;
 
+// Define an enum for different types of errors
+#[derive(Debug)]
+pub enum TaskManagerError {
+   EmptyTitleOrDescription,
+   TaskNotFound,
+}
+
+impl fmt::Display for TaskManagerError {
+   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+       match *self {
+           TaskManagerError::EmptyTitleOrDescription => write!(f, "Title or Description is empty."),
+           TaskManagerError::TaskNotFound => write!(f, "Task not found."),
+       }
+   }
+}
 
 // Task struct
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
@@ -22,13 +38,17 @@ thread_local! {
 
 #[ic_cdk::update]
 // create task
-fn create_task(title: String, description: String, is_important: Option<bool>) -> u64 {
+fn create_task(title: String, description: String, is_important: Option<bool>) -> Result<u64, TaskManagerError> {
+    if title.is_empty() || description.is_empty() {
+        return Err(TaskManagerError::EmptyTitleOrDescription);
+    }
+ 
     let id = NEXT_ID.with(|id| {
         let next_id = id.get();
         id.set(next_id + 1);
         next_id
     });
-
+ 
     let task = Task {
         id,
         title,
@@ -36,11 +56,11 @@ fn create_task(title: String, description: String, is_important: Option<bool>) -
         is_important: is_important.unwrap_or(false),
         done: false,
     };
-
+ 
     TASKS.with(|tasks| tasks.borrow_mut().insert(id, task));
-
+ 
     id
-}
+ }
 
 #[ic_cdk::query]
 // get task by id
@@ -56,31 +76,40 @@ fn get_all_tasks() -> Vec<Task> {
 
 #[ic_cdk::update]
 // update task details
-fn update_task(id: u64, title: Option<String>, description: Option<String>, done: Option<bool>, is_important: Option<bool>) -> bool {
+fn update_task(id: u64, title: Option<String>, description: Option<String>, done: Option<bool>, is_important: Option<bool>) -> Result<(), TaskManagerError> {
     TASKS.with(|tasks| {
         if let Some(task) = tasks.borrow_mut().get_mut(&id) {
             if let Some(new_title) = title {
+                if new_title.is_empty() {
+                   return Err(TaskManagerError::EmptyTitleOrDescription);
+                }
                 task.title = new_title;
             }
             if let Some(new_description) = description {
+                if new_description.is_empty() {
+                   return Err(TaskManagerError::EmptyTitleOrDescription);
+                }
                 task.description = new_description;
             }
             if let Some(new_done) = done {
                 task.done = new_done;
             }
             task.is_important = is_important.unwrap_or(false);
-            true
+            ()
         } else {
-            false
+            Err(TaskManagerError::TaskNotFound)
         }
     })
 }
 
 #[ic_cdk::update]
 // delete task
-fn delete_task(id: u64) -> bool {
-    TASKS.with(|tasks| tasks.borrow_mut().remove(&id).is_some())
-}
+fn delete_task(id: u64) -> Result<(), TaskManagerError> {
+    if TASKS.with(|tasks| tasks.borrow_mut().remove(&id).is_none()) {
+        return Err(TaskManagerError::TaskNotFound);
+    }
+    ()
+ }
 
 #[ic_cdk::query]
 // search task by status
