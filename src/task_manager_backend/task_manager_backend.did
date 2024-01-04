@@ -13,4 +13,14 @@ service : {
   "update_task": (nat64, opt text, opt text, opt bool, opt bool) -> ();
   "delete_task": (nat64) -> (bool);
   "search_task_by_status": (bool) -> (vec customTask) query;
+  "get_important_tasks": () -> (vec customTask) query;
+  "get_completed_tasks": () -> (vec customTask) query;
+  "get_incomplete_tasks": () -> (vec customTask) query;
+  "get_total_number_of_tasks": () -> (nat64) query;
+  "get_tasks_by_description": (text) -> (vec customTask) query;
+  "get_tasks_by_importance_status": (bool) -> (vec customTask) query;
+  "clear_completed_tasks": () -> ();
+  "mark_task_as_done": (nat64) -> ();
+  "reset_task_status": (nat64) -> ();
+  "get_tasks_by_title": (text) -> (vec customTask) query;
 };

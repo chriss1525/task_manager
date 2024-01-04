@@ -164,19 +164,6 @@ fn get_tasks_by_description(description: String) -> Vec<Task> {
     })
 }
 
-#[ic_cdk::update]
-// Set task importance status
-fn set_task_importance_status(id: u64, is_important: bool) -> bool {
-    TASKS.with(|tasks| {
-        if let Some(task) = tasks.borrow_mut().get_mut(&id) {
-            task.is_important = is_important;
-            true
-        } else {
-            false
-        }
-    })
-}
-
 #[ic_cdk::query]
 // Get tasks based on importance status
 fn get_tasks_by_importance_status(is_important: bool) -> Vec<Task> {
@@ -188,12 +175,6 @@ fn get_tasks_by_importance_status(is_important: bool) -> Vec<Task> {
             .cloned()
             .collect()
     })
-}
-
-#[ic_cdk::query]
-// Get the total number of tasks
-fn get_total_tasks() -> usize {
-    TASKS.with(|tasks| tasks.borrow().len())
 }
 
 #[ic_cdk::update]
